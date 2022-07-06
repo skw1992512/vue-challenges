@@ -1,42 +1,51 @@
-<script setup lang='ts'>
-import { ref,watch } from "vue"
-
-const count = ref(0)
+<script setup lang="ts">
+import { ref, h } from "vue";
 
 /**
- * 实现`until`函数
-*/
-
-function until(initial:any) {
-  function toBe(value:any) {
-    return new Promise<void>((resolve, reject) => {
-      const stop = watch(initial, (newValue:any) => {
-      if(newValue === value) {
-        resolve(newValue)
-        stop()
-      }
+ * 实现该函数式组件 :
+ * 1. 使用`list`数据渲染列表元素 (ul/li)
+ * 2. 当点击列表子元素时,将其文本颜色更改为红色
+ */
+const ListComponent = (props: any, { attrs, emit }: any) => {
+  return h(
+    "ul",
+    {},
+    props.list.map((item: any, index: any) => {
+      return h(
+        "li",
+        {
+          onClick() {
+            emit("toggle", index);
+          },
+          style: {
+            color: index === props["active-index"] ? "red" : "",
+          },
+        },
+        item.name
+      );
     })
-    })
-  }
+  );
+};
 
-  return {
-    toBe,
-  }
+const list = [
+  {
+    name: "John",
+  },
+  {
+    name: "Doe",
+  },
+  {
+    name: "Smith",
+  },
+];
+
+const activeIndex = ref(0);
+
+function toggle(index: number) {
+  activeIndex.value = index;
 }
-
-async function increase() {
-  count.value = 0
-  setInterval(() => {
-    count.value++
-  }, 1000)
-  await until(count).toBe(3)
-  console.log(count.value === 3) // 确保输出为true
-}
-
 </script>
 
 <template>
- <p @click="increase"> 
-   Increase {{count}}
- </p>
+  <list-component :list="list" :active-index="activeIndex" @toggle="toggle" />
 </template>
